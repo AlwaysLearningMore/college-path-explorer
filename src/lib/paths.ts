@@ -1,4 +1,4 @@
-import { dataset, type SchoolTypeId } from '../data'
+import { dataset, type SchoolTypeId, type Trade } from '../data'
 
 /**
  * A Path is a sequence of training phases followed by a career.
@@ -13,8 +13,11 @@ export interface Phase {
   /** Specific-school annual cost (overrides national average) in `costBaseYear` dollars. */
   annualCost?: number
   costBaseYear?: number
-  /** Annual income earned during the phase (e.g. apprentice wages). */
+  /** Annual income earned during the phase (e.g. apprentice wages), in `incomeBaseYear` dollars. */
   annualIncome?: number
+  /** Apprentice pay as a share of journeyworker median: [first year, last year], interpolated. */
+  incomePctRange?: [number, number]
+  incomeBaseYear?: number
 }
 
 export interface EarningsOverride {
@@ -31,8 +34,9 @@ export interface PathDef {
   description: string
   color: string
   phases: Phase[]
-  /** 'major' = earnings from selected major; 'highSchool' = BLS baseline. */
-  earnings: 'major' | 'highSchool'
+  /** 'major' = earnings from selected major; 'highSchool' = BLS baseline; 'trade' = OEWS wages for `trade`. */
+  earnings: 'major' | 'highSchool' | 'trade'
+  trade?: Trade
   earningsOverride?: EarningsOverride
   costNote?: string
 }
@@ -82,3 +86,32 @@ export const HS_PATH: PathDef = {
 
 export const PATHS = [...NATIONAL_PATHS, HS_PATH]
 export const schoolCosts = dataset.schoolCosts
+
+/** Trade-school cost per year: public two-year tuition & fees + books/transport/other, living at home (College Board 2025-26). */
+export const TRADE_SCHOOL_COST = dataset.schoolCosts.public2yr.tuitionFees + dataset.schoolCosts.public2yr.booksTransportOther
+
+const TRADE_SHORT: Record<string, string> = {
+  electrician: 'Electrician', plumber: 'Plumber', carpenter: 'Carpenter', lineworker: 'Lineworker', hvac: 'HVAC tech',
+  auto: 'Auto tech', welder: 'Welder', equipment: 'Equip. operator', diesel: 'Diesel tech',
+}
+
+export function tradePath(t: Trade): PathDef {
+  const aw = dataset.apprenticeWage
+  const phases: Phase[] =
+    t.training === 'apprenticeship'
+      ? [{ label: 'Paid apprenticeship', years: t.years, annualIncome: t.wages.p50, incomePctRange: [aw.startPct, aw.endPct], incomeBaseYear: 2025 }]
+      : t.training === 'school'
+        ? [{ label: 'Trade program', years: t.years, annualCost: TRADE_SCHOOL_COST, costBaseYear: 2025, schoolType: 'public2yr' }]
+        : []
+  const how = t.training === 'apprenticeship' ? `${t.years}-yr paid apprenticeship` : t.training === 'school' ? `${t.years}-yr trade program` : 'on-the-job training'
+  return {
+    id: `trade-${t.id}`,
+    name: `Trade: ${t.name}`,
+    short: TRADE_SHORT[t.id] ?? t.name,
+    description: `${how}, then work. ${t.trainingNote}`,
+    color: '#f59e0b',
+    phases,
+    earnings: 'trade',
+    trade: t,
+  }
+}

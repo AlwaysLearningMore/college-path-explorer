@@ -18,9 +18,10 @@ interface Props {
   selected: SchoolHit[]
   setSelected: (s: SchoolHit[]) => void
   initialZip?: string
+  onOrigin?: (state: string | null) => void
 }
 
-export function LocalSearch({ major, programs, selected, setSelected, initialZip = '' }: Props) {
+export function LocalSearch({ major, programs, selected, setSelected, initialZip = '', onOrigin }: Props) {
   const [zip, setZip] = useState(initialZip)
   const [radius, setRadius] = useState(60)
   const [hits, setHits] = useState<SchoolHit[] | null>(null)
@@ -37,8 +38,10 @@ export function LocalSearch({ major, programs, selected, setSelected, initialZip
       if (!origin) {
         setError('ZIP code not found. Enter a 5-digit U.S. ZIP code.')
         setHits(null)
+        onOrigin?.(null)
         return
       }
+      onOrigin?.(origin[2] || null)
       setHits(await searchNearby(origin, r))
     } finally {
       setLoading(false)
@@ -150,7 +153,7 @@ export function LocalSearch({ major, programs, selected, setSelected, initialZip
             </table>
           </div>
           <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Drive times are <strong>estimated</strong>: straight-line distance × {CIRCUITY} U.S. road circuity factor (Ballou et al., 2002) at an assumed {AVG_MPH} mph average. Costs are Scorecard averages (public schools use in-state tuition). "{major.name} grads" = Scorecard median earnings for that school's bachelor's program (4 yrs after graduation, else 1 yr); "national" means no school data, so national major figures are used.
+            Drive times are <strong>estimated</strong>: straight-line distance × {CIRCUITY} U.S. road circuity factor (Ballou et al., 2002) at an assumed {AVG_MPH} mph average. Costs in this list are Scorecard averages at in-state tuition; in the comparison cards, public schools outside your ZIP's state (or all publics if you choose Out-of-state) swap in Scorecard out-of-state tuition. "{major.name} grads" = Scorecard median earnings for that school's bachelor's program (4 yrs after graduation, else 1 yr); "national" means no school data, so national major figures are used.
           </p>
         </>
       )}

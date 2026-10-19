@@ -7,6 +7,7 @@ Inputs (download into ./rawdata, not committed):
     Most-Recent-Cohorts-Field-of-Study.csv
   Census 2024 Gazetteer ZCTA file, https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html
     2024_Gaz_zcta_national.txt
+    tab20_zcta520_county20_natl.txt (2020 ZCTA-to-county relationship file, for ZIP state)
 
 Usage: python3 scripts/build_school_data.py rawdata
 """
@@ -91,6 +92,19 @@ with open(os.path.join(out, 'schools.json'), 'w') as f:
 with open(os.path.join(out, 'programs.json'), 'w') as f:
     json.dump(fos, f, separators=(',', ':'))
 
+FIPS = {'01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE','11':'DC','12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA','20':'KS','21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN','28':'MS','29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM','36':'NY','37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI','45':'SC','46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA','54':'WV','55':'WI','56':'WY','72':'PR'}
+# ZCTA -> state via the Census 2020 ZCTA-to-county relationship file (state = county with most land in the ZCTA)
+zstate, best = {}, {}
+with open(os.path.join(raw, 'tab20_zcta520_county20_natl.txt')) as f:
+    for r in csv.DictReader(f, delimiter='|'):
+        z, c = r['GEOID_ZCTA5_20'], r['GEOID_COUNTY_20']
+        if not z:
+            continue
+        land = int(r['AREALAND_PART'] or 0)
+        if land >= best.get(z, -1):
+            best[z] = land
+            zstate[z] = FIPS.get(c[:2], '')
+
 zips = {}
 with open(os.path.join(raw, '2024_Gaz_zcta_national.txt')) as f:
     rd = csv.reader(f, delimiter='\t')
@@ -98,7 +112,7 @@ with open(os.path.join(raw, '2024_Gaz_zcta_national.txt')) as f:
     for row in rd:
         d = dict(zip(h, [x.strip() for x in row]))
         z = d['GEOID']
-        zips.setdefault(z[:3], {})[z] = [round(float(d['INTPTLAT']), 4), round(float(d['INTPTLONG']), 4)]
+        zips.setdefault(z[:3], {})[z] = [round(float(d['INTPTLAT']), 4), round(float(d['INTPTLONG']), 4), zstate.get(z, '')]
 for p, v in zips.items():
     with open(os.path.join(out, 'zips', f'{p}.json'), 'w') as f:
         json.dump(v, f, separators=(',', ':'))

@@ -95,6 +95,46 @@
       "url": "https://doi.org/10.1016/S0965-8564(01)00044-1",
       "dataYear": "2002",
       "notes": "U.S. road circuity factor \u2248 1.20 (road distance \u00f7 straight-line distance)."
+    },
+    {
+      "id": "bls-oews-2025",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Occupational Employment and Wage Statistics (OEWS), national annual wage percentiles",
+      "url": "https://www.bls.gov/oes/current/oes_nat.htm",
+      "dataYear": "May 2025",
+      "notes": "10th/25th/50th/75th/90th percentile annual wages via BLS public API (series OEUN\u2026)."
+    },
+    {
+      "id": "bls-ep-54",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Employment Projections Table 5.4: Education and training assignments by detailed occupation; Occupational Outlook Handbook \"How to Become One\"",
+      "url": "https://www.bls.gov/emp/tables/education-and-training-by-occupation.htm",
+      "dataYear": "2025",
+      "notes": "Typical entry education and on-the-job training (e.g. Apprenticeship) per occupation; program lengths from OOH."
+    },
+    {
+      "id": "bls-co-2013",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Apprenticeship: Earn while you learn (Career Outlook / OOQ, Summer 2013)",
+      "url": "https://www.bls.gov/careeroutlook/2013/summer/art01.pdf",
+      "dataYear": "2013",
+      "notes": "Typical registered apprenticeship lengths: electricians 4 yrs, carpenters 4, plumbers 3\u20134, pipefitters 4\u20135, line repairers 3\u20134."
+    },
+    {
+      "id": "urban-wage-schedules",
+      "publisher": "Urban Institute",
+      "title": "Setting Wages in Your Registered Apprenticeship Program",
+      "url": "https://www.urban.org/sites/default/files/publication/104473/setting-wages-in-your-registered-apprenticeship-program_0.pdf",
+      "dataYear": "2021",
+      "notes": "Typical apprentice wage progression as % of journeyworker wage."
+    },
+    {
+      "id": "census-zcta-county",
+      "publisher": "U.S. Census Bureau",
+      "title": "2020 ZCTA to County Relationship File",
+      "url": "https://www2.census.gov/geo/docs/maps-data/data/rel2020/zcta520/tab20_zcta520_county20_natl.txt",
+      "dataYear": "2020",
+      "notes": "Used to assign each ZIP to a state for in-state / out-of-state detection."
     }
   ],
   "schoolCosts": {
@@ -127,6 +167,16 @@
       "sourceId": "cb-pricing-2025",
       "netTuitionFees": 16910,
       "netSourceId": "cb-highlights-2025"
+    },
+    "public4yrOutOfState": {
+      "label": "Public four-year (out-of-state)",
+      "tuitionFees": 31880,
+      "housingFood": 13900,
+      "booksTransportOther": 5140,
+      "totalBudget": 50920,
+      "sourceId": "cb-pricing-2025",
+      "netTuitionFees": null,
+      "netNote": "College Board does not publish an out-of-state net tuition figure; sticker tuition is used."
     }
   },
   "wageDistributionRecentGrads": {
@@ -435,17 +485,189 @@
     "realGrowth30yr": {
       "public2yr": 0.01308,
       "public4yrInState": 0.02357,
-      "private4yr": 0.01869
+      "private4yr": 0.01869,
+      "public4yrOutOfState": 0.02357
     },
     "realGrowth10yr": {
       "public2yr": -0.01048,
       "public4yrInState": -0.00723,
-      "private4yr": 0.00198
+      "private4yr": 0.00198,
+      "public4yrOutOfState": -0.00723
     },
     "growthSourceId": "cb-pricing-2025",
-    "growthNote": "30-yr: 1995-96 to 2025-26 average published tuition & fees in 2025 dollars ($2,810\u2192$4,150 two-year, $5,940\u2192$11,950 public 4-yr, $25,820\u2192$45,000 private). 10-yr: 2015-16 to 2025-26 change of \u221210%, \u22127%, +2% (inflation-adjusted). Compound annual rates derived from these.",
+    "growthNote": "30-yr: 1995-96 to 2025-26 average published tuition & fees in 2025 dollars ($2,810\u2192$4,150 two-year, $5,940\u2192$11,950 public 4-yr, $25,820\u2192$45,000 private). 10-yr: 2015-16 to 2025-26 change of \u221210%, \u22127%, +2% (inflation-adjusted). Compound annual rates derived from these. Out-of-state public tuition uses the public four-year in-state trend (no separate long-run series used).",
     "cpiInflation": 0.03163,
     "cpiNote": "CPI-U U.S. city average annual average, 2015 (237.017) to 2024 (313.689), compound annual rate.",
     "cpiSourceId": "bls-cpi-u"
+  },
+  "trades": [
+    {
+      "id": "electrician",
+      "name": "Electrician",
+      "soc": "47-2111",
+      "training": "apprenticeship",
+      "years": 4,
+      "trainingNote": "4- or 5-year apprenticeship; ~2,000 paid OJT hours per year (OOH). Modeled as 4 years.",
+      "oohUrl": "https://www.bls.gov/ooh/construction-and-extraction/electricians.htm",
+      "wages": {
+        "p10": 42640,
+        "p25": 49430,
+        "p50": 63190,
+        "p75": 83940,
+        "p90": 108510
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "plumber",
+      "name": "Plumber / pipefitter / steamfitter",
+      "soc": "47-2152",
+      "training": "apprenticeship",
+      "years": 4,
+      "trainingNote": "Apprenticeship: plumbers 3\u20134 yrs, pipefitters 4\u20135 yrs (BLS Career Outlook 2013). Modeled as 4 years.",
+      "oohUrl": "https://www.bls.gov/ooh/construction-and-extraction/plumbers-pipefitters-and-steamfitters.htm",
+      "wages": {
+        "p10": 44150,
+        "p25": 50190,
+        "p50": 63800,
+        "p75": 85110,
+        "p90": 108420
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "carpenter",
+      "name": "Carpenter",
+      "soc": "47-2031",
+      "training": "apprenticeship",
+      "years": 4,
+      "trainingNote": "Apprenticeship, typically 4 years (BLS Career Outlook 2013).",
+      "oohUrl": "https://www.bls.gov/ooh/construction-and-extraction/carpenters.htm",
+      "wages": {
+        "p10": 40410,
+        "p25": 48510,
+        "p50": 60580,
+        "p75": 76830,
+        "p90": 99910
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "lineworker",
+      "name": "Electrical power-line installer (lineworker)",
+      "soc": "49-9051",
+      "training": "apprenticeship",
+      "years": 3,
+      "trainingNote": "Apprenticeship/employer training up to 3 years; journey level after 3\u20134 years (OOH). Modeled as 3 years.",
+      "oohUrl": "https://www.bls.gov/ooh/installation-maintenance-and-repair/line-installers-and-repairers.htm",
+      "wages": {
+        "p10": 51470,
+        "p25": 67270,
+        "p50": 95320,
+        "p75": 109740,
+        "p90": 128690
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "hvac",
+      "name": "HVAC/R mechanic & installer",
+      "soc": "49-9021",
+      "training": "school",
+      "years": 1,
+      "trainingNote": "Postsecondary program of 6 months to 2 years (OOH), then long-term OJT. Modeled as 1 year of school at public two-year tuition.",
+      "oohUrl": "https://www.bls.gov/ooh/installation-maintenance-and-repair/heating-air-conditioning-and-refrigeration-mechanics-and-installers.htm",
+      "wages": {
+        "p10": 40050,
+        "p25": 48360,
+        "p50": 61010,
+        "p75": 77060,
+        "p90": 95210
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "auto",
+      "name": "Automotive service technician",
+      "soc": "49-3023",
+      "training": "school",
+      "years": 1,
+      "trainingNote": "Postsecondary program usually 6 months to 1 year (OOH). Modeled as 1 year at public two-year tuition.",
+      "oohUrl": "https://www.bls.gov/ooh/installation-maintenance-and-repair/automotive-service-technicians-and-mechanics.htm",
+      "wages": {
+        "p10": 34660,
+        "p25": 38900,
+        "p50": 50620,
+        "p75": 70430,
+        "p90": 81790
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "welder",
+      "name": "Welder / cutter / solderer / brazer",
+      "soc": "51-4121",
+      "training": "ojt",
+      "years": 0,
+      "trainingNote": "High school diploma + moderate-term on-the-job training (BLS EP Table 5.4). Modeled as starting work right away.",
+      "oohUrl": "https://www.bls.gov/ooh/production/welders-cutters-solderers-and-brazers.htm",
+      "wages": {
+        "p10": 39240,
+        "p25": 46790,
+        "p50": 53750,
+        "p75": 63010,
+        "p90": 77530
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "equipment",
+      "name": "Construction equipment operator",
+      "soc": "47-2073",
+      "training": "ojt",
+      "years": 0,
+      "trainingNote": "High school diploma + moderate-term on-the-job training (BLS EP Table 5.4). Modeled as starting work right away.",
+      "oohUrl": "https://www.bls.gov/ooh/construction-and-extraction/construction-equipment-operators.htm",
+      "wages": {
+        "p10": 42190,
+        "p25": 48680,
+        "p50": 59850,
+        "p75": 77170,
+        "p90": 101090
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    },
+    {
+      "id": "diesel",
+      "name": "Diesel / bus & truck mechanic",
+      "soc": "49-3031",
+      "training": "ojt",
+      "years": 0,
+      "trainingNote": "High school diploma + long-term on-the-job training (BLS EP Table 5.4; OOH). Modeled as starting work right away as a trainee.",
+      "oohUrl": "https://www.bls.gov/ooh/installation-maintenance-and-repair/diesel-service-technicians-and-mechanics.htm",
+      "wages": {
+        "p10": 44530,
+        "p25": 50540,
+        "p50": 61770,
+        "p75": 75470,
+        "p90": 88740
+      },
+      "wageSourceId": "bls-oews-2025",
+      "trainingSourceId": "bls-ep-54"
+    }
+  ],
+  "apprenticeWage": {
+    "startPct": 0.45,
+    "endPct": 0.8,
+    "sourceId": "urban-wage-schedules",
+    "note": "Urban Institute (for DOL): typical entry wage \u224840\u201350% of journeyworker wage, intermediate wages 50\u201380%, exit wage = journeyworker. Modeled as 45% in year 1 rising linearly to 80% in the final year, applied to the OEWS median."
   }
 }

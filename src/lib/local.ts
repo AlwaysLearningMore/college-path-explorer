@@ -37,12 +37,13 @@ export const AVG_MPH = 45
 const base = import.meta.env.BASE_URL
 let schoolsP: Promise<School[]> | null = null
 let programsP: Promise<Programs> | null = null
-const zipCache = new Map<string, Promise<Record<string, [number, number]>>>()
+const zipCache = new Map<string, Promise<Record<string, [number, number, string]>>>()
 
 export const loadSchools = (): Promise<School[]> => (schoolsP ??= fetch(`${base}data/schools.json`).then((r) => r.json() as Promise<School[]>))
 export const loadPrograms = () => (programsP ??= fetch(`${base}data/programs.json`).then((r) => r.json()))
 
-export async function lookupZip(zip: string): Promise<[number, number] | null> {
+/** Returns [lat, lon, state] for a ZIP (Census ZCTA), or null. */
+export async function lookupZip(zip: string): Promise<[number, number, string] | null> {
   if (!/^\d{5}$/.test(zip)) return null
   const p = zip.slice(0, 3)
   if (!zipCache.has(p)) zipCache.set(p, fetch(`${base}data/zips/${p}.json`).then((r) => (r.ok ? r.json() : {})))
@@ -61,11 +62,11 @@ export function haversineMiles(a: [number, number], b: [number, number]) {
 
 export const estDriveMinutes = (straightMiles: number) => ((straightMiles * CIRCUITY) / AVG_MPH) * 60
 
-export async function searchNearby(origin: [number, number], maxMinutes: number): Promise<SchoolHit[]> {
+export async function searchNearby(origin: [number, number] | [number, number, string], maxMinutes: number): Promise<SchoolHit[]> {
   const schools = await loadSchools()
   return schools
     .map((s): SchoolHit => {
-      const miles = haversineMiles(origin, [s.la, s.lo])
+      const miles = haversineMiles([origin[0], origin[1]], [s.la, s.lo])
       return { ...s, miles, minutes: estDriveMinutes(miles) }
     })
     .filter((s) => s.minutes <= maxMinutes)

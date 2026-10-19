@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { GraduationCap, Moon, Sun, TrendingUp, Wallet, Clock, Info, Hammer, Globe, MapPin } from 'lucide-react'
 import { dataset, getSource } from './data'
-import { PATHS, HS_PATH } from './lib/paths'
+import { HS_PATH, NATIONAL_PATHS, tradePath } from './lib/paths'
 import { buildSchoolPaths } from './lib/schoolPaths'
 import type { Programs, SchoolHit } from './lib/local'
 import { breakEven, defaultAssumptions, simulate, usd, percentileFactor, nominalGrowth } from './lib/model'
@@ -21,16 +21,18 @@ export default function App() {
   const [mode, setMode] = useState<'national' | 'local'>(params.get('zip') ? 'local' : 'national')
   const [selected, setSelected] = useState<SchoolHit[]>([])
   const [programs, setPrograms] = useState<Programs | null>(null)
+  const [originState, setOriginState] = useState<string | null>(null)
+  const trade = dataset.trades.find((t) => t.id === a.tradeId)
   useEffect(() => {
     if (mode === 'local' && !programs) void import('./lib/local').then((m) => m.loadPrograms()).then(setPrograms)
   }, [mode, programs])
 
-  const paths = useMemo(
-    () => (mode === 'local' && selected.length && programs ? [...buildSchoolPaths(selected, major, programs, a), HS_PATH] : PATHS),
-    [mode, selected, programs, major, a],
-  )
+  const usingSchools = mode === 'local' && selected.length > 0 && !!programs
+  const paths = useMemo(() => {
+    const college = usingSchools ? buildSchoolPaths(selected, major, programs!, a, originState) : NATIONAL_PATHS
+    return [...college, ...(trade ? [tradePath(trade)] : []), HS_PATH]
+  }, [usingSchools, selected, programs, major, a, originState, trade])
   const results = useMemo(() => paths.map((p) => simulate(p, major, a)), [paths, major, a])
-  const usingSchools = paths !== PATHS
   const base = results.find((r) => r.path.earnings === 'highSchool')!
   const college = results.filter((r) => r !== base)
   const best = [...college].sort((x, y) => y.lifetimeNet - x.lifetimeNet)[0]
@@ -79,7 +81,7 @@ export default function App() {
 
         {mode === 'local' && (
           <Suspense fallback={<div className="card animate-pulse text-sm text-slate-500">Loading school data…</div>}>
-            <LocalSearch major={major} programs={programs} selected={selected} setSelected={setSelected} initialZip={params.get('zip') ?? ''} />
+            <LocalSearch major={major} programs={programs} selected={selected} setSelected={setSelected} initialZip={params.get('zip') ?? ''} onOrigin={setOriginState} />
           </Suspense>
         )}
 
@@ -100,13 +102,21 @@ export default function App() {
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <Stat icon={<Wallet className="h-3.5 w-3.5" />} k="Total cost" v={usd(r.totalCost)} />
                   <Stat icon={<Wallet className="h-3.5 w-3.5" />} k={`Year 1 (${a.startYear})`} v={r.firstYearCost ? usd(r.firstYearCost) : '—'} />
-                  <Stat icon={<Wallet className="h-3.5 w-3.5" />} k="Borrowed" v={usd(r.borrowed)} />
+                  {r.trainingIncome > 0
+                    ? <Stat icon={<TrendingUp className="h-3.5 w-3.5" />} k="Paid while training" v={usd(r.trainingIncome)} />
+                    : <Stat icon={<Wallet className="h-3.5 w-3.5" />} k="Borrowed" v={usd(r.borrowed)} />}
                   <Stat icon={<TrendingUp className="h-3.5 w-3.5" />} k="Starting pay" v={usd(r.startingSalary)} />
                   <Stat icon={<TrendingUp className="h-3.5 w-3.5" />} k="Mid-career" v={usd(r.midSalary)} />
                   <Stat icon={<Clock className="h-3.5 w-3.5" />} k="Loan / month" v={r.monthlyPayment ? usd(r.monthlyPayment) : '—'} />
                   <Stat icon={<Clock className="h-3.5 w-3.5" />} k="Passes 'work now'" v={r === base ? 'baseline' : be ? `${be.year} (age ${be.age})` : 'not within horizon'} />
                 </dl>
-                {r.path.id !== 'hs' && (
+                {r.path.trade && (
+                  <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] font-semibold">
+                    <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-700 dark:text-amber-300" title="BLS OEWS May 2025 national wages; local metro wages not yet included">Pay: BLS OEWS national</span>
+                    <span className="rounded-full bg-slate-500/15 px-2 py-0.5 text-slate-600 dark:text-slate-300">{r.path.trade.training === 'apprenticeship' ? 'Earn while you learn' : r.path.trade.training === 'school' ? 'Trade school' : 'On-the-job training'}</span>
+                  </div>
+                )}
+                {r.path.earnings === 'major' && (
                   <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] font-semibold">
                     <span className={`rounded-full px-2 py-0.5 ${r.path.earningsOverride ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-slate-500/15 text-slate-600 dark:text-slate-300'}`}
                       title={r.path.earningsOverride?.note ?? 'No school-specific earnings for this major: NY Fed national medians used'}>
@@ -168,13 +178,26 @@ export default function App() {
           </p>
         </section>
 
-        <section className="card flex items-start gap-4 border-dashed">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/20 text-amber-600 dark:text-amber-300"><Hammer className="h-5 w-5" /></div>
-          <div>
-            <h2 className="font-bold">Coming soon: Trades & apprenticeships</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Electricians, plumbers, HVAC, welders — paid apprenticeships where you earn while you learn. The path engine already supports paid training phases.</p>
-          </div>
-        </section>
+        {trade && (
+          <section className="card">
+            <div className="flex items-start gap-4">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400/20 text-amber-600 dark:text-amber-300"><Hammer className="h-5 w-5" /></div>
+              <div>
+                <h2 className="text-lg font-bold">{trade.name}: pay & training (national, May 2025)</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{trade.trainingNote} <a className="text-amber-600 underline dark:text-amber-300" href={trade.oohUrl} target="_blank" rel="noreferrer">BLS Occupational Outlook Handbook</a></p>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-5">
+              {(['p10', 'p25', 'p50', 'p75', 'p90'] as const).map((k) => (
+                <Big key={k} k={`${k.slice(1)}th percentile`.replace('50th percentile', 'Median')} v={usd(trade.wages[k])} />
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              Model: {trade.training === 'apprenticeship' ? `apprentice pay rises from ${dataset.apprenticeWage.startPct * 100}% to ${dataset.apprenticeWage.endPct * 100}% of the median over ${trade.years} years (Urban Institute guidance for registered apprenticeships: entry ≈40–50%, intermediate 50–80%). ` : trade.training === 'school' ? `${trade.years} year of trade school at public two-year tuition + books/other (College Board 2025-26), living at home. ` : 'starts work right after high school. '}
+              After training, pay starts at the 25th percentile and rises to the median over 13 years (25th/75th scenarios shift this to 10th→25th or median→75th). This experience curve is a model assumption. Wages are national; local metro wages are not yet included.
+            </p>
+          </section>
+        )}
 
         <Sources />
 

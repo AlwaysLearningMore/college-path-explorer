@@ -36,6 +36,19 @@ export function Controls({ majorId, setMajorId, a, setA }: Props) {
         </select>
       </div>
       <div>
+        <label htmlFor="trade" className="label">Trade to compare</label>
+        <select id="trade" value={a.tradeId} onChange={(e) => setA({ ...a, tradeId: e.target.value })}
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm focus:outline-2 focus:outline-amber-500 dark:border-white/10 dark:bg-slate-900">
+          <option value="">None</option>
+          {dataset.trades.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+      </div>
+      <div>
+        <span className="label">Public-school residency</span>
+        <Toggle label="Residency" value={a.residency} onChange={(residency) => setA({ ...a, residency })}
+          options={[{ v: 'auto', l: 'Auto (by ZIP)' }, { v: 'in', l: 'In-state' }, { v: 'out', l: 'Out-of-state' }]} />
+      </div>
+      <div>
         <span className="label">Price basis</span>
         <Toggle label="Price basis" value={a.pricing} onChange={(pricing) => setA({ ...a, pricing })}
           options={[{ v: 'sticker', l: 'Sticker price' }, { v: 'net', l: 'After avg. grants' }]} />

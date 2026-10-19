@@ -16,6 +16,9 @@ export interface Assumptions {
   startYear: number
   /** Which College Board real tuition trend to project with. */
   growthTrend: '30yr' | '10yr'
+  /** Public-school residency. 'auto' = compare ZIP state with school state (local mode); national mode treats auto as in-state. */
+  residency: 'auto' | 'in' | 'out'
+  tradeId: string
 }
 
 const proj = dataset.projection
@@ -29,6 +32,8 @@ export const defaultAssumptions: Assumptions = {
   percentile: 'p50',
   startYear: 2027,
   growthTrend: '30yr',
+  residency: 'auto',
+  tradeId: 'electrician',
 }
 
 const dist = dataset.wageDistributionRecentGrads
@@ -59,8 +64,9 @@ export function nationalAnnualCost(t: SchoolTypeId, a: Assumptions) {
 
 /** Cost in a given calendar year for a phase (projected forward with tuition growth). */
 export function phaseCostInYear(ph: PathDef['phases'][number], year: number, a: Assumptions) {
-  const t = ph.schoolType ?? 'public4yrInState'
-  const base = ph.annualCost ?? (ph.schoolType ? nationalAnnualCost(ph.schoolType, a) : 0)
+  let t: SchoolTypeId = ph.schoolType ?? 'public4yrInState'
+  if (!ph.annualCost && t === 'public4yrInState' && a.residency === 'out') t = 'public4yrOutOfState'
+  const base = ph.annualCost ?? (ph.schoolType ? nationalAnnualCost(t, a) : 0)
   const baseYear = ph.annualCost ? (ph.costBaseYear ?? proj.baseYear) : proj.baseYear
   if (!base) return 0
   return base * Math.pow(1 + nominalGrowth(t, a), year - baseYear)
@@ -73,6 +79,12 @@ export function salaryAt(path: PathDef, major: Major, careerYear: number, year: 
     const b = dataset.baselines.highSchool
     const weekly = a.percentile === 'p50' ? b.medianWeekly : a.percentile === 'p25' ? b.p25Weekly! : b.p75Weekly!
     return inflate(weekly * WEEKS, BLS_YEAR, year)
+  }
+  if (path.earnings === 'trade' && path.trade) {
+    const w = path.trade.wages
+    const [lo, hi] = a.percentile === 'p25' ? [w.p10, w.p25] : a.percentile === 'p75' ? [w.p50, w.p75] : [w.p25, w.p50]
+    const t = Math.min(careerYear / 13, 1)
+    return inflate(lo + (hi - lo) * t, BLS_YEAR, year)
   }
   const o = path.earningsOverride
   const early = o?.early ?? major.earlyCareerMedian
@@ -98,6 +110,7 @@ export interface PathResult {
   startingSalary: number
   midSalary: number
   firstYearCost: number
+  trainingIncome: number
   series: YearPoint[]
   lifetimeNet: number
 }
@@ -121,7 +134,12 @@ export function simulate(path: PathDef, major: Major, a: Assumptions): PathResul
       const c = phaseCostInYear(ph, y0, a)
       totalCost += c
       yearCosts.push(c)
-      yearIncome.push(ph.annualIncome ?? 0)
+      let inc = ph.annualIncome ?? 0
+      if (inc && ph.incomePctRange) {
+        const [p0, p1] = ph.incomePctRange
+        inc *= ph.years > 1 ? p0 + ((p1 - p0) * i) / (ph.years - 1) : p0
+      }
+      yearIncome.push(inc ? inflate(inc, ph.incomeBaseYear ?? BLS_YEAR, y0) : 0)
     }
   }
   const borrowed = totalCost * (1 - a.paidUpFront)
@@ -159,6 +177,7 @@ export function simulate(path: PathDef, major: Major, a: Assumptions): PathResul
     startingSalary: salaryAt(path, major, 0, careerStart, a),
     midSalary: salaryAt(path, major, 13, careerStart + 13, a),
     firstYearCost: yearCosts[0] ?? 0,
+    trainingIncome: yearIncome.reduce((x, y) => x + y, 0),
     series,
     lifetimeNet: cum,
   }

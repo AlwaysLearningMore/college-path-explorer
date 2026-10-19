@@ -35,6 +35,25 @@ python3 scripts/build_school_data.py rawdata
 
 (Check https://collegescorecard.ed.gov/data/ for the latest file names.)
 
+## Out-of-state tuition
+
+The **Public-school residency** control has three settings: *Auto (by ZIP)*, *In-state* and *Out-of-state*.
+- National mode: out-of-state swaps in College Board 2025-26 public four-year out-of-state tuition ($31,880; budget $50,920). Auto counts as in-state there.
+- Local mode: Auto compares the state of your ZIP (Census 2020 ZCTA-to-county file) with each public school's state. Out-of-state schools use Scorecard `COSTT4_A − TUITIONFEE_IN + TUITIONFEE_OUT`. For net price, the same tuition difference is added to NPT4, which is an approximation. Private schools are unaffected.
+
+## Trades & apprenticeships
+
+Pick a trade to add it as a path next to the college paths: electrician, plumber/pipefitter, carpenter, lineworker, HVAC/R, auto tech, welder, construction equipment operator or diesel tech.
+- **Wages**: BLS OEWS May 2025 national 10th/25th/median/75th/90th percentile annual wages (BLS API).
+- **Training** (BLS EP Table 5.4 + OOH + BLS Career Outlook 2013):
+  - Apprenticeship: electrician 4 yrs, plumber 4, carpenter 4, lineworker 3.
+  - Trade program: HVAC 1 yr, auto 1 yr.
+  - On-the-job training, starting work right away: welder, equipment operator, diesel.
+- **Earn while you learn**: apprentice pay rises from 45% to 80% of the OEWS median over the apprenticeship. This follows Urban Institute guidance for registered apprenticeships: entry ≈40–50%, intermediate 50–80%, exit = journeyworker.
+- **Trade-school cost**: College Board public two-year tuition & fees + books/transport/other, living at home.
+- **Assumption**: after training, pay starts at the 25th percentile and rises to the median over 13 years. The 25th/75th scenarios use 10th→25th and median→75th instead.
+- Wages are national. Metro-level OEWS wages are not included yet (roadmap).
+
 ## Start year & cost projection
 
 Pick the year you start college (2026–2032). Costs for each year in school are projected from their base year at
@@ -81,6 +100,9 @@ Every figure lives in `src/data/seed.json` with a `sourceId` pointing to the `so
 - **U.S. Dept. of Education — Federal Register notice of Direct Loan interest rates** (2025-26).
 - **U.S. Dept. of Education — College Scorecard** Most Recent Institution-Level and Field-of-Study data (updated Oct 15, 2026). https://collegescorecard.ed.gov/data/
 - **U.S. Census Bureau — 2024 Gazetteer ZCTA file** (ZIP centroids).
+- **BLS — OEWS May 2025** national wage percentiles; **EP Table 5.4** education & training; **OOH** training lengths; **Career Outlook 2013** apprenticeship lengths.
+- **Urban Institute — Setting Wages in Your Registered Apprenticeship Program** (apprentice wage progression).
+- **Census — 2020 ZCTA-to-county relationship file** (ZIP → state).
 - **BLS — CPI-U (CUUR0000SA0)** annual averages 2015–2024.
 - **Ballou, Rahardja & Sakai (2002)**, *Selected country circuity factors for road travel distance estimation*, Transportation Research Part A 36(9) — U.S. factor 1.20.
 
@@ -128,9 +150,11 @@ A path is just data: a list of `phases` (each with years, an optional `schoolTyp
 
 ## Roadmap
 
-- [ ] **Trades & apprenticeships** (electrician, plumber, HVAC, welder, etc.) — earn-while-you-learn path
+- [x] **Trades & apprenticeships**: earn-while-you-learn path (national wages)
+- [ ] Metro-level OEWS trade wages in local mode
 - [x] College Scorecard integration: specific schools near a ZIP
-- [ ] Real routing for drive times; out-of-state tuition option
+- [x] Out-of-state tuition
+- [ ] Real routing for drive times
 - [ ] State-level tuition (College Board Table CP-5)
 - [ ] Taxes, inflation and savings/investing for true net worth
 - [ ] Graduate school paths, shareable scenario links, side-by-side major comparison
@@ -138,3 +162,7 @@ A path is just data: a list of `phases` (each with years, an optional `schoolTyp
 ## License
 
 MIT
+
+## Deploy (GitHub Pages)
+
+`.github/workflows/pages.yml` builds with `PAGES_BASE=/college-path-explorer/` and deploys `dist/` to GitHub Pages on every push to `main`. Lazy-loaded data uses `import.meta.env.BASE_URL`, so it works under the sub-path.

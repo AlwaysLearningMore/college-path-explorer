@@ -7,10 +7,21 @@ import type { Assumptions } from './model'
 export const SCORECARD_BASE_YEAR = 2024
 const PALETTE = ['#22d3ee', '#a78bfa', '#f472b6', '#34d399', '#fbbf24', '#fb7185', '#60a5fa', '#c084fc']
 
-export function schoolCost(s: SchoolHit, a: Assumptions): { cost: number; note: string } | null {
-  if (a.pricing === 'net' && s.np) return { cost: s.np, note: 'Scorecard avg. net price' }
-  if (s.coa) return { cost: s.coa, note: a.pricing === 'net' ? 'Scorecard cost of attendance (no net price)' : 'Scorecard cost of attendance' }
-  if (s.np) return { cost: s.np, note: 'Scorecard avg. net price (no COA)' }
+/** Is the student out-of-state for this (public) school? */
+export function isOutOfState(s: SchoolHit, a: Assumptions, originState: string | null) {
+  if (s.ctl !== 1) return false
+  if (a.residency === 'out') return true
+  if (a.residency === 'in') return false
+  return !!originState && originState !== s.s
+}
+
+/** Scorecard COA / net price assume in-state tuition for publics; out-of-state swaps in TUITIONFEE_OUT. */
+export function schoolCost(s: SchoolHit, a: Assumptions, originState: string | null = null): { cost: number; note: string } | null {
+  const oos = isOutOfState(s, a, originState) && s.tin && s.tout ? s.tout - s.tin : 0
+  const tag = oos ? ' + out-of-state tuition' : ''
+  if (a.pricing === 'net' && s.np) return { cost: s.np + oos, note: `Scorecard avg. net price${tag}` }
+  if (s.coa) return { cost: s.coa + oos, note: (a.pricing === 'net' ? 'Scorecard cost of attendance (no net price)' : 'Scorecard cost of attendance') + tag }
+  if (s.np) return { cost: s.np + oos, note: `Scorecard avg. net price (no COA)${tag}` }
   return null
 }
 
@@ -30,14 +41,14 @@ function programEarnings(s: SchoolHit | undefined, major: Major, programs: Progr
   }
 }
 
-export function buildSchoolPaths(selected: SchoolHit[], major: Major, programs: Programs, a: Assumptions): PathDef[] {
+export function buildSchoolPaths(selected: SchoolHit[], major: Major, programs: Programs, a: Assumptions, originState: string | null): PathDef[] {
   const transferTarget = selected.find((s) => s.t === 'public4')
   return selected.map((s, i) => {
-    const c = schoolCost(s, a)
+    const c = schoolCost(s, a, originState)
     const color = PALETTE[i % PALETTE.length]
     const short = s.n.length > 22 ? s.n.slice(0, 20) + '…' : s.n
     if (s.t === 'twoYear') {
-      const tc = transferTarget ? schoolCost(transferTarget, a) : null
+      const tc = transferTarget ? schoolCost(transferTarget, a, originState) : null
       return {
         id: `school-${s.id}`,
         name: `${s.n} → ${transferTarget ? transferTarget.n : 'public 4-yr (nat. avg.)'}`,
@@ -58,7 +69,7 @@ export function buildSchoolPaths(selected: SchoolHit[], major: Major, programs: 
       id: `school-${s.id}`,
       name: s.n,
       short,
-      description: `${s.c}, ${s.s} · ${s.t === 'public4' ? 'Public' : 'Private nonprofit'} 4-year · ~${Math.round(s.minutes)} min away (est.)`,
+      description: `${s.c}, ${s.s} · ${s.t === 'public4' ? (isOutOfState(s, a, originState) ? 'Public 4-year, out-of-state' : 'Public 4-year, in-state') : 'Private nonprofit 4-year'} · ~${Math.round(s.minutes)} min away (est.)`,
       color,
       phases: [c ? { label: s.n, years: 4, annualCost: c.cost, costBaseYear: SCORECARD_BASE_YEAR, schoolType: type } : { label: s.n, years: 4, schoolType: type }],
       earnings: 'major',

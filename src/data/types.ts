@@ -9,7 +9,7 @@ export interface Source {
   notes?: string
 }
 
-export type SchoolTypeId = 'public2yr' | 'public4yrInState' | 'private4yr'
+export type SchoolTypeId = 'public2yr' | 'public4yrInState' | 'public4yrOutOfState' | 'private4yr'
 
 export interface SchoolCost {
   label: string
@@ -54,6 +54,8 @@ export interface Dataset {
   federalLoanRate: { undergradFixedRate: number; sourceId: SourceId }
   majors: Major[]
   projection: Projection
+  trades: Trade[]
+  apprenticeWage: { startPct: number; endPct: number; sourceId: SourceId; note: string }
 }
 
 export interface Projection {
@@ -65,4 +67,18 @@ export interface Projection {
   cpiInflation: number
   cpiNote: string
   cpiSourceId: SourceId
+}
+
+export interface Trade {
+  id: string
+  name: string
+  soc: string
+  /** apprenticeship = paid training; school = short trade program then work; ojt = start work, learn on the job */
+  training: 'apprenticeship' | 'school' | 'ojt'
+  years: number
+  trainingNote: string
+  oohUrl: string
+  wages: { p10: number; p25: number; p50: number; p75: number; p90: number }
+  wageSourceId: SourceId
+  trainingSourceId: SourceId
 }
