@@ -53,4 +53,16 @@ export interface Dataset {
   baselines: Record<'highSchool' | 'associate' | 'bachelorsOnly', Baseline>
   federalLoanRate: { undergradFixedRate: number; sourceId: SourceId }
   majors: Major[]
+  projection: Projection
+}
+
+export interface Projection {
+  baseYear: number
+  realGrowth30yr: Record<SchoolTypeId, number>
+  realGrowth10yr: Record<SchoolTypeId, number>
+  growthSourceId: SourceId
+  growthNote: string
+  cpiInflation: number
+  cpiNote: string
+  cpiSourceId: SourceId
 }

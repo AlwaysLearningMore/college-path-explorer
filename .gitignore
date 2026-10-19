@@ -28,3 +28,6 @@ dist-ssr
 .env.*
 !.env.example
 data/scorecard-*.json
+
+# raw bulk downloads for scripts/build_school_data.py
+rawdata/

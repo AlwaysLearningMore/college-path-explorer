@@ -55,6 +55,46 @@
       "url": "https://www.bls.gov/news.release/wkyeng.t09.htm",
       "dataYear": "2025 annual average",
       "notes": "Full-time wage and salary workers age 25+."
+    },
+    {
+      "id": "bls-cpi-u",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "CPI for All Urban Consumers (CPI-U), series CUUR0000SA0, annual averages",
+      "url": "https://data.bls.gov/timeseries/CUUR0000SA0",
+      "dataYear": "2015\u20132024",
+      "notes": "Used to convert today's dollars into future (start-year and later) dollars."
+    },
+    {
+      "id": "scorecard-inst",
+      "publisher": "U.S. Department of Education",
+      "title": "College Scorecard \u2014 Most Recent Institution-Level Data",
+      "url": "https://collegescorecard.ed.gov/data/",
+      "dataYear": "Data updated Oct 15, 2026",
+      "notes": "Location, control, cost of attendance (COSTT4_A), average net price (NPT4), median earnings 10 yrs after entry, median debt, completion rate."
+    },
+    {
+      "id": "scorecard-fos",
+      "publisher": "U.S. Department of Education",
+      "title": "College Scorecard \u2014 Most Recent Data by Field of Study",
+      "url": "https://collegescorecard.ed.gov/data/",
+      "dataYear": "Data updated Oct 15, 2026",
+      "notes": "Bachelor's-level median earnings 1 and 4 years after completion by 4-digit CIP code."
+    },
+    {
+      "id": "census-zcta",
+      "publisher": "U.S. Census Bureau",
+      "title": "2024 Gazetteer Files \u2014 ZIP Code Tabulation Areas",
+      "url": "https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html",
+      "dataYear": "2024",
+      "notes": "ZCTA internal-point latitude/longitude used for ZIP code location."
+    },
+    {
+      "id": "ballou-circuity",
+      "publisher": "Ballou, Rahardja & Sakai (Transportation Research Part A, 2002)",
+      "title": "Selected country circuity factors for road travel distance estimation",
+      "url": "https://doi.org/10.1016/S0965-8564(01)00044-1",
+      "dataYear": "2002",
+      "notes": "U.S. road circuity factor \u2248 1.20 (road distance \u00f7 straight-line distance)."
     }
   ],
   "schoolCosts": {
@@ -389,5 +429,23 @@
       "shareWithGradDegree": 51.388,
       "sourceId": "nyfed-major-2024"
     }
-  ]
+  ],
+  "projection": {
+    "baseYear": 2025,
+    "realGrowth30yr": {
+      "public2yr": 0.01308,
+      "public4yrInState": 0.02357,
+      "private4yr": 0.01869
+    },
+    "realGrowth10yr": {
+      "public2yr": -0.01048,
+      "public4yrInState": -0.00723,
+      "private4yr": 0.00198
+    },
+    "growthSourceId": "cb-pricing-2025",
+    "growthNote": "30-yr: 1995-96 to 2025-26 average published tuition & fees in 2025 dollars ($2,810\u2192$4,150 two-year, $5,940\u2192$11,950 public 4-yr, $25,820\u2192$45,000 private). 10-yr: 2015-16 to 2025-26 change of \u221210%, \u22127%, +2% (inflation-adjusted). Compound annual rates derived from these.",
+    "cpiInflation": 0.03163,
+    "cpiNote": "CPI-U U.S. city average annual average, 2015 (237.017) to 2024 (313.689), compound annual rate.",
+    "cpiSourceId": "bls-cpi-u"
+  }
 }

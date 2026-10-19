@@ -57,6 +57,16 @@ export function Controls({ majorId, setMajorId, a, setA }: Props) {
           onChange={(e) => setA({ ...a, horizonYears: +e.target.value })} className="w-full accent-violet-600" />
       </div>
       <div>
+        <label htmlFor="start" className="label">Start college in: {a.startYear}</label>
+        <input id="start" type="range" min={2026} max={2032} value={a.startYear}
+          onChange={(e) => setA({ ...a, startYear: +e.target.value })} className="w-full accent-violet-600" />
+        <div className="mt-2 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          Tuition trend:
+          <Toggle label="Tuition growth trend" value={a.growthTrend} onChange={(growthTrend) => setA({ ...a, growthTrend })}
+            options={[{ v: '30yr', l: '30-yr' }, { v: '10yr', l: '10-yr' }]} />
+        </div>
+      </div>
+      <div>
         <span className="label">Housing</span>
         <Toggle label="Housing" value={a.liveAtHome ? 'home' : 'campus'} onChange={(v) => setA({ ...a, liveAtHome: v === 'home' })}
           options={[{ v: 'campus', l: 'On campus' }, { v: 'home', l: 'Live at home' }]} />

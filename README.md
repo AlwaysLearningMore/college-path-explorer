@@ -13,6 +13,37 @@ Compare four paths side by side:
 
 For each of 24 majors you get total cost of attendance, how much you'd borrow, monthly loan payment, early- and mid-career salary (25th / median / 75th percentile scenarios), a cumulative earnings chart from age 18 to 33–58, and the age at which each college path passes the "work now" path (break-even).
 
+## Schools near me (local mode)
+
+Switch to **Schools near me**, enter a 5-digit ZIP and a max drive time (30/60/90/120 min). The app lists **every** currently operating, degree-granting (associate or higher) public and private nonprofit institution in range from the College Scorecard — 2,974 schools nationally (876 community/2-year, 798 public 4-year, 1,300 private nonprofit 4-year) — with type, city, estimated drive time, cost of attendance, average net price, median earnings 10 years after entry, and the school's median earnings for your selected major where Scorecard reports it. Tick up to 6 schools to compare them in the cards and charts instead of national averages. You can deep-link with `?zip=60601`.
+
+- A 2-year school is modeled as 2+2: two years there, then the first selected public 4-year school (or the national public average).
+- Earnings: the school's Scorecard bachelor's field-of-study median (4 yrs after graduation, else 1 yr), with mid-career scaled by the national early→mid growth for that major. When missing, NY Fed national medians are used and the card says **"Pay: national avg."**
+- **Drive times are estimated**: great-circle distance × 1.20 U.S. road circuity factor (Ballou, Rahardja & Sakai 2002) ÷ an assumed 45 mph average. No routing API is called.
+- School data is lazy-loaded from `public/data/` (`schools.json` ~0.6 MB, `programs.json` ~0.3 MB, ZIP centroids split by 3-digit prefix into `zips/*.json` of a few KB each), so the main bundle doesn't grow.
+
+Rebuild the data:
+
+```bash
+mkdir rawdata && cd rawdata
+curl -LO https://ed-public-download.scorecard.network/downloads/Most-Recent-Cohorts-Institution_10152026.zip
+curl -LO https://ed-public-download.scorecard.network/downloads/Most-Recent-Cohorts-Field-of-Study_10152026.zip
+curl -LO https://www2.census.gov/geo/docs/maps-data/data/gazetteer/2024_Gazetteer/2024_Gaz_zcta_national.zip
+for z in *.zip; do unzip -o $z; done; cd ..
+python3 scripts/build_school_data.py rawdata
+```
+
+(Check https://collegescorecard.ed.gov/data/ for the latest file names.)
+
+## Start year & cost projection
+
+Pick the year you start college (2026–2032). Costs for each year in school are projected from their base year at
+`(1 + College Board real tuition growth) × (1 + CPI inflation) − 1`:
+
+- Real growth: College Board *Trends in College Pricing 2025* — 30-year trend (1995-96→2025-26: two-year 1.31%/yr, public 4-yr 2.36%/yr, private 1.87%/yr) or 10-year trend (2015-16→2025-26: −1.05%, −0.72%, +0.20%/yr).
+- Inflation: BLS CPI-U annual averages 2015→2024 = 3.16%/yr.
+- Salaries are inflated from their data year with CPI only. All app figures are **nominal dollars of the year spent/earned**, and the chart's x-axis is calendar years (age 18 = start year).
+
 ## Run it
 
 ```bash
@@ -48,8 +79,17 @@ Every figure lives in `src/data/seed.json` with a `sourceId` pointing to the `so
 - **College Board — Trends in College Pricing and Student Aid 2025** (Table CP-1 / Figure CP-1; net prices from the Highlights page).
 - **BLS — CPS Table 37b** and **Usual Weekly Earnings Table 9** (2025 annual averages).
 - **U.S. Dept. of Education — Federal Register notice of Direct Loan interest rates** (2025-26).
+- **U.S. Dept. of Education — College Scorecard** Most Recent Institution-Level and Field-of-Study data (updated Oct 15, 2026). https://collegescorecard.ed.gov/data/
+- **U.S. Census Bureau — 2024 Gazetteer ZCTA file** (ZIP centroids).
+- **BLS — CPI-U (CUUR0000SA0)** annual averages 2015–2024.
+- **Ballou, Rahardja & Sakai (2002)**, *Selected country circuity factors for road travel distance estimation*, Transportation Research Part A 36(9) — U.S. factor 1.20.
 
 ### Known data gaps
+
+- Drive time is an estimate (straight line × 1.2 at 45 mph — the speed is an assumption, not sourced); real times vary with traffic and terrain.
+- Scorecard cost/earnings base year is treated as 2024 for projection; public-school costs assume in-state tuition; "live at home" only affects national averages (Scorecard COA isn't split by housing).
+- Field-of-study earnings are often suppressed for small programs → national fallback (labeled). Scorecard 4-yr-after-graduation earnings are later than the NY Fed's age 22–27 "early career" window, so school figures can look higher.
+- ZIP lookup uses Census ZCTAs; some PO-box-only ZIPs have no ZCTA and won't be found.
 
 - Per-major 25th/75th percentile salaries aren't in the NY Fed by-major table; the app applies the all-majors spread (labeled as an estimate).
 - Salaries are the same for a major regardless of school type — national school-type-by-major earnings will come from College Scorecard (below).
@@ -74,11 +114,14 @@ Plan: aggregate medians by CIP and institution control, add them to the seed wit
 ```
 src/
   data/        seed.json (all numbers + citations), types.ts, index.ts
+  lib/local.ts lazy loaders, ZIP lookup, distance & drive-time estimate
+  lib/schoolPaths.ts turns selected schools into PathDefs
   lib/paths.ts PATHS: each path = training phases + an earnings model
   lib/model.ts simulation: cost, loans, salary curve, break-even
   components/  Controls, Charts (Recharts), Sources, theme hook
   App.tsx      layout
-scripts/       data-pulling scripts
+scripts/       build_school_data.py (Scorecard + Census → public/data), fetch-scorecard.mjs
+public/data/   generated school, program and ZIP JSON (lazy-loaded)
 ```
 
 A path is just data: a list of `phases` (each with years, an optional `schoolType` cost and optional `annualIncome`) plus an `earnings` model. Adding **Trades** means adding sourced apprenticeship wages and journeyworker salaries (e.g. BLS Occupational Outlook Handbook, DOL Apprenticeship data) to the seed and a new `PATHS` entry with a paid apprenticeship phase.
@@ -86,7 +129,8 @@ A path is just data: a list of `phases` (each with years, an optional `schoolTyp
 ## Roadmap
 
 - [ ] **Trades & apprenticeships** (electrician, plumber, HVAC, welder, etc.) — earn-while-you-learn path
-- [ ] College Scorecard integration: salary & debt by school type and by specific school
+- [x] College Scorecard integration: specific schools near a ZIP
+- [ ] Real routing for drive times; out-of-state tuition option
 - [ ] State-level tuition (College Board Table CP-5)
 - [ ] Taxes, inflation and savings/investing for true net worth
 - [ ] Graduate school paths, shareable scenario links, side-by-side major comparison
