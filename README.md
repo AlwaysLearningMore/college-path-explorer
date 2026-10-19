@@ -15,7 +15,7 @@ For each of 24 majors you get total cost of attendance, how much you'd borrow, m
 
 ## Schools near me (local mode)
 
-Switch to **Schools near me**, enter a 5-digit ZIP and a max drive time (30/60/90/120 min). The app lists **every** currently operating, degree-granting (associate or higher) public and private nonprofit institution in range from the College Scorecard — 2,974 schools nationally (876 community/2-year, 798 public 4-year, 1,300 private nonprofit 4-year) — with type, city, estimated drive time, cost of attendance, average net price, median earnings 10 years after entry, and the school's median earnings for your selected major where Scorecard reports it. Tick up to 6 schools to compare them in the cards and charts instead of national averages. You can deep-link with `?zip=60601`.
+Switch to **Schools near me**, enter a 5-digit ZIP and a max drive time (30 min, then 1 to 7 hours). The app lists **every** currently operating, degree-granting (associate or higher) public and private nonprofit institution in range from the College Scorecard — 2,974 schools nationally (876 community/2-year, 798 public 4-year, 1,300 private nonprofit 4-year) — with type, city, estimated drive time, cost of attendance, average net price, median earnings 10 years after entry, and the school's median earnings for your selected major where Scorecard reports it. Tick up to 6 schools to compare them in the cards and charts instead of national averages. You can deep-link with `?zip=60601`.
 
 - A 2-year school is modeled as 2+2: two years there, then the first selected public 4-year school (or the national public average).
 - Earnings: the school's Scorecard bachelor's field-of-study median (4 yrs after graduation, else 1 yr), with mid-career scaled by the national early→mid growth for that major. When missing, NY Fed national medians are used and the card says **"Pay: national avg."**
@@ -34,6 +34,10 @@ python3 scripts/build_school_data.py rawdata
 ```
 
 (Check https://collegescorecard.ed.gov/data/ for the latest file names.)
+
+### Efficiency column
+
+`Efficiency = MD_EARN_WNE_P10 ÷ (NPT4 × years)`: median earnings 10 years after entry divided by the degree's net cost, using 2 years for 2-year schools and 4 for 4-year schools. Both values come from College Scorecard and use in-state net price. Read 1.0× as "one year of typical earnings equals the full degree net cost"; payback ≈ 1/efficiency years of gross earnings. It shows "—" when either input is missing. The list is sortable by any column (missing values go last) and paginated at 50 rows.
 
 ## Out-of-state tuition
 
@@ -165,4 +169,4 @@ MIT
 
 ## Deploy (GitHub Pages)
 
-`.github/workflows/pages.yml` builds with `PAGES_BASE=/college-path-explorer/` and deploys `dist/` to GitHub Pages on every push to `main`. Lazy-loaded data uses `import.meta.env.BASE_URL`, so it works under the sub-path.
+Live at https://alwayslearningmore.github.io/college-path-explorer/. Pages serves the `gh-pages` branch. Deploy with `npm run build:pages` (base `/college-path-explorer/`), then push `dist/` (with a `.nojekyll` file) to `gh-pages`. Local `npm run dev` / `npm run build` still use `/`. Lazy-loaded data uses `import.meta.env.BASE_URL`, so it works under the sub-path.
