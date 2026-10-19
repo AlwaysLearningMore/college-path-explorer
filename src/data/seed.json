@@ -1,0 +1,393 @@
+{
+  "sources": [
+    {
+      "id": "nyfed-major-2024",
+      "publisher": "Federal Reserve Bank of New York",
+      "title": "The Labor Market for Recent College Graduates \u2014 Outcomes by Major",
+      "url": "https://www.newyorkfed.org/research/college-labor-market",
+      "dataYear": "2024 (released Feb 4, 2026)",
+      "notes": "Census ACS (IPUMS). Early career = ages 22\u201327; mid-career = ages 35\u201345; full-time workers with a bachelor's degree only, excluding students."
+    },
+    {
+      "id": "nyfed-wage-dist-2025",
+      "publisher": "Federal Reserve Bank of New York",
+      "title": "Distribution of Annual Wages for Recent College Graduates, by Percentile",
+      "url": "https://www.newyorkfed.org/medialibrary/Research/Interactives/Data/college-labor-market/Distribution-of-Annual-Wages-Various-Percentile",
+      "dataYear": "2025 (constant 2025 dollars)",
+      "notes": "All majors combined; CPS March Supplement (IPUMS). Recent grads ages 22\u201327, bachelor's only, full-time."
+    },
+    {
+      "id": "cb-pricing-2025",
+      "publisher": "College Board",
+      "title": "Trends in College Pricing and Student Aid 2025 (Table CP-1, Figure CP-1)",
+      "url": "https://research.collegeboard.org/media/pdf/Trends-in-College-Pricing-and-Student-Aid-2025-final.pdf",
+      "dataYear": "2025-26",
+      "notes": "Enrollment-weighted national averages for full-time undergraduates."
+    },
+    {
+      "id": "cb-highlights-2025",
+      "publisher": "College Board",
+      "title": "Trends in College Pricing: Highlights (net prices)",
+      "url": "https://research.collegeboard.org/trends/college-pricing/highlights",
+      "dataYear": "2025-26 (estimated)",
+      "notes": "Average net tuition & fees after grant aid for first-time full-time students."
+    },
+    {
+      "id": "bls-cps-37b-2025",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "CPS Table 37b: Median weekly earnings by educational attainment",
+      "url": "https://www.bls.gov/cps/cpsaat37b.htm",
+      "dataYear": "2025 annual average (11 months; Oct 2025 not collected)",
+      "notes": "Full-time wage and salary workers age 25+."
+    },
+    {
+      "id": "fr-loan-rates-2025",
+      "publisher": "U.S. Department of Education (Federal Register)",
+      "title": "Annual Notice of Interest Rates for Fixed-Rate Federal Student Loans",
+      "url": "https://www.federalregister.gov/documents/2026/03/02/2026-04065/annual-notice-of-interest-rates-for-fixed-rate-federal-student-loans-made-under-the-william-d-ford",
+      "dataYear": "Loans first disbursed 7/1/2025\u20136/30/2026",
+      "notes": "Direct Subsidized/Unsubsidized undergraduate fixed rate."
+    },
+    {
+      "id": "bls-wkyeng-t09-2025",
+      "publisher": "U.S. Bureau of Labor Statistics",
+      "title": "Usual Weekly Earnings, Table 9: Quartiles of usual weekly earnings",
+      "url": "https://www.bls.gov/news.release/wkyeng.t09.htm",
+      "dataYear": "2025 annual average",
+      "notes": "Full-time wage and salary workers age 25+."
+    }
+  ],
+  "schoolCosts": {
+    "public2yr": {
+      "label": "Public two-year (in-district)",
+      "tuitionFees": 4150,
+      "housingFood": 10850,
+      "booksTransportOther": 6320,
+      "totalBudget": 21320,
+      "sourceId": "cb-pricing-2025",
+      "netTuitionFees": null,
+      "netNote": "College Board reports grant aid has covered average tuition & fees for first-time full-time public two-year students since 2009-10, but publishes no single dollar figure; not modeled."
+    },
+    "public4yrInState": {
+      "label": "Public four-year (in-state)",
+      "tuitionFees": 11950,
+      "housingFood": 13900,
+      "booksTransportOther": 5140,
+      "totalBudget": 30990,
+      "sourceId": "cb-pricing-2025",
+      "netTuitionFees": 2300,
+      "netSourceId": "cb-highlights-2025"
+    },
+    "private4yr": {
+      "label": "Private nonprofit four-year",
+      "tuitionFees": 45000,
+      "housingFood": 15920,
+      "booksTransportOther": 4550,
+      "totalBudget": 65470,
+      "sourceId": "cb-pricing-2025",
+      "netTuitionFees": 16910,
+      "netSourceId": "cb-highlights-2025"
+    }
+  },
+  "wageDistributionRecentGrads": {
+    "p10": 30002,
+    "p25": 45000,
+    "p50": 60000,
+    "p75": 85000,
+    "p90": 130000,
+    "sourceId": "nyfed-wage-dist-2025"
+  },
+  "baselines": {
+    "highSchool": {
+      "label": "High school diploma, no college",
+      "medianWeekly": 966,
+      "p25Weekly": 729,
+      "p75Weekly": 1374,
+      "sourceId": "bls-cps-37b-2025",
+      "quartileSourceId": "bls-wkyeng-t09-2025"
+    },
+    "associate": {
+      "label": "Associate degree",
+      "medianWeekly": 1135,
+      "sourceId": "bls-cps-37b-2025"
+    },
+    "bachelorsOnly": {
+      "label": "Bachelor's degree only",
+      "medianWeekly": 1578,
+      "p25Weekly": 1083,
+      "p75Weekly": 2380,
+      "sourceId": "bls-cps-37b-2025",
+      "quartileSourceId": "bls-wkyeng-t09-2025"
+    }
+  },
+  "federalLoanRate": {
+    "undergradFixedRate": 0.0639,
+    "sourceId": "fr-loan-rates-2025"
+  },
+  "majors": [
+    {
+      "id": "comm",
+      "name": "Communications",
+      "category": "Humanities & Arts",
+      "earlyCareerMedian": 52000,
+      "midCareerMedian": 88000,
+      "unemploymentRate": 3.856,
+      "underemploymentRate": 53.028,
+      "shareWithGradDegree": 24.652,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "cs",
+      "name": "Computer Science",
+      "category": "STEM",
+      "earlyCareerMedian": 87000,
+      "midCareerMedian": 120000,
+      "unemploymentRate": 6.992,
+      "underemploymentRate": 19.127,
+      "shareWithGradDegree": 32.691,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "eled",
+      "name": "Elementary Education",
+      "category": "Education",
+      "earlyCareerMedian": 45000,
+      "midCareerMedian": 55000,
+      "unemploymentRate": 1.18,
+      "underemploymentRate": 16.213,
+      "shareWithGradDegree": 50.596,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "chemeng",
+      "name": "Chemical Engineering",
+      "category": "STEM",
+      "earlyCareerMedian": 85000,
+      "midCareerMedian": 135000,
+      "unemploymentRate": 4.711,
+      "underemploymentRate": 17.862,
+      "shareWithGradDegree": 48.111,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "civeng",
+      "name": "Civil Engineering",
+      "category": "STEM",
+      "earlyCareerMedian": 75000,
+      "midCareerMedian": 115000,
+      "unemploymentRate": 2.256,
+      "underemploymentRate": 15.567,
+      "shareWithGradDegree": 37.138,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "compe",
+      "name": "Computer Engineering",
+      "category": "STEM",
+      "earlyCareerMedian": 90000,
+      "midCareerMedian": 131000,
+      "unemploymentRate": 7.783,
+      "underemploymentRate": 15.835,
+      "shareWithGradDegree": 39.432,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "ee",
+      "name": "Electrical Engineering",
+      "category": "STEM",
+      "earlyCareerMedian": 82000,
+      "midCareerMedian": 123000,
+      "unemploymentRate": 3.159,
+      "underemploymentRate": 21.106,
+      "shareWithGradDegree": 47.67,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "mecheng",
+      "name": "Mechanical Engineering",
+      "category": "STEM",
+      "earlyCareerMedian": 80000,
+      "midCareerMedian": 120000,
+      "unemploymentRate": 4.364,
+      "underemploymentRate": 20.088,
+      "shareWithGradDegree": 39.059,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "english",
+      "name": "English Language",
+      "category": "Humanities & Arts",
+      "earlyCareerMedian": 48000,
+      "midCareerMedian": 76000,
+      "unemploymentRate": 6.14,
+      "underemploymentRate": 48.544,
+      "shareWithGradDegree": 46.201,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "bio",
+      "name": "Biology",
+      "category": "STEM",
+      "earlyCareerMedian": 45000,
+      "midCareerMedian": 83000,
+      "unemploymentRate": 4.292,
+      "underemploymentRate": 51.13,
+      "shareWithGradDegree": 63.983,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "math",
+      "name": "Mathematics",
+      "category": "STEM",
+      "earlyCareerMedian": 70000,
+      "midCareerMedian": 100000,
+      "unemploymentRate": 5.767,
+      "underemploymentRate": 26.225,
+      "shareWithGradDegree": 51.343,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "psych",
+      "name": "Psychology",
+      "category": "Social Science",
+      "earlyCareerMedian": 45000,
+      "midCareerMedian": 72000,
+      "unemploymentRate": 4.985,
+      "underemploymentRate": 48.291,
+      "shareWithGradDegree": 51.864,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "cj",
+      "name": "Criminal Justice",
+      "category": "Social Science",
+      "earlyCareerMedian": 50000,
+      "midCareerMedian": 80000,
+      "unemploymentRate": 3.557,
+      "underemploymentRate": 65.79,
+      "shareWithGradDegree": 24.609,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "econ",
+      "name": "Economics",
+      "category": "Social Science",
+      "earlyCareerMedian": 72000,
+      "midCareerMedian": 115000,
+      "unemploymentRate": 3.524,
+      "underemploymentRate": 33.094,
+      "shareWithGradDegree": 41.595,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "polisci",
+      "name": "Political Science",
+      "category": "Social Science",
+      "earlyCareerMedian": 52000,
+      "midCareerMedian": 100000,
+      "unemploymentRate": 4.482,
+      "underemploymentRate": 48.662,
+      "shareWithGradDegree": 52.741,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "construction",
+      "name": "Construction Services",
+      "category": "Applied",
+      "earlyCareerMedian": 75000,
+      "midCareerMedian": 120000,
+      "unemploymentRate": 2.184,
+      "underemploymentRate": 17.933,
+      "shareWithGradDegree": 12.214,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "finearts",
+      "name": "Fine Arts",
+      "category": "Humanities & Arts",
+      "earlyCareerMedian": 45000,
+      "midCareerMedian": 72000,
+      "unemploymentRate": 7.655,
+      "underemploymentRate": 58.87,
+      "shareWithGradDegree": 22.475,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "graphic",
+      "name": "Commercial Art & Graphic Design",
+      "category": "Humanities & Arts",
+      "earlyCareerMedian": 50000,
+      "midCareerMedian": 80000,
+      "unemploymentRate": 5.743,
+      "underemploymentRate": 37.14,
+      "shareWithGradDegree": 13.002,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "nursing",
+      "name": "Nursing",
+      "category": "Health",
+      "earlyCareerMedian": 70000,
+      "midCareerMedian": 87000,
+      "unemploymentRate": 2.147,
+      "underemploymentRate": 12.781,
+      "shareWithGradDegree": 30.292,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "accounting",
+      "name": "Accounting",
+      "category": "Business",
+      "earlyCareerMedian": 68000,
+      "midCareerMedian": 97000,
+      "unemploymentRate": 2.553,
+      "underemploymentRate": 21.156,
+      "shareWithGradDegree": 33.667,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "bizmgmt",
+      "name": "Business Management",
+      "category": "Business",
+      "earlyCareerMedian": 56000,
+      "midCareerMedian": 82000,
+      "unemploymentRate": 3.786,
+      "underemploymentRate": 52.605,
+      "shareWithGradDegree": 25.274,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "marketing",
+      "name": "Marketing",
+      "category": "Business",
+      "earlyCareerMedian": 60000,
+      "midCareerMedian": 100000,
+      "unemploymentRate": 4.399,
+      "underemploymentRate": 49.343,
+      "shareWithGradDegree": 19.665,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "category": "Business",
+      "earlyCareerMedian": 70000,
+      "midCareerMedian": 112000,
+      "unemploymentRate": 2.758,
+      "underemploymentRate": 27.758,
+      "shareWithGradDegree": 31.483,
+      "sourceId": "nyfed-major-2024"
+    },
+    {
+      "id": "history",
+      "name": "History",
+      "category": "Humanities & Arts",
+      "earlyCareerMedian": 47500,
+      "midCareerMedian": 80000,
+      "unemploymentRate": 4.311,
+      "underemploymentRate": 50.077,
+      "shareWithGradDegree": 51.388,
+      "sourceId": "nyfed-major-2024"
+    }
+  ]
+}

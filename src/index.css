@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { @apply bg-slate-50 text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100; }
+
+.card { @apply rounded-2xl border border-slate-200/70 bg-white/70 p-5 shadow-sm backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-white/[0.04]; }
+.chip { @apply rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500; }
+.chip-on { @apply bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-md shadow-violet-500/25; }
+.chip-off { @apply bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10; }
+.label { @apply mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400; }
